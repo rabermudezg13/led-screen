@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LED Message Display</title>
+    <title>LED Display</title>
     <style>
         body {
             margin: 0;
@@ -28,6 +28,7 @@
             margin: 5px 0;
             border: none;
             border-radius: 5px;
+            font-size: 18px;
         }
 
         .display-container {
@@ -35,17 +36,22 @@
             padding: 20px;
             border-radius: 10px;
             width: 100%;
-            max-width: 300px;
+            max-width: 100%;
             overflow: hidden;
+            margin-top: 20px;
         }
 
         .led-text {
-            font-family: 'Digital-7', monospace;
+            font-family: monospace;
             white-space: nowrap;
             color: #ff0000;
-            font-size: 24px;
+            font-size: 48px;
             text-align: center;
-            text-shadow: 0 0 5px #ff0000;
+            text-shadow: 0 0 10px #ff0000;
+            font-weight: bold;
+        }
+
+        .scrolling {
             animation: scroll-left 20s linear infinite;
         }
 
@@ -54,10 +60,18 @@
             100% { transform: translateX(-100%); }
         }
 
-        .color-red { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
-        .color-green { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
-        .color-blue { color: #0000ff; text-shadow: 0 0 5px #0000ff; }
-        .color-yellow { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
+        .static {
+            animation: none;
+            /* Centrar el texto cuando está estático */
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .color-red { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+        .color-green { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
+        .color-blue { color: #0000ff; text-shadow: 0 0 10px #0000ff; }
+        .color-yellow { color: #ffff00; text-shadow: 0 0 10px #ffff00; }
     </style>
 </head>
 <body>
@@ -69,6 +83,10 @@
             <option value="blue">Blue</option>
             <option value="yellow">Yellow</option>
         </select>
+        <select id="movementSelect">
+            <option value="static">Static</option>
+            <option value="scroll">Scrolling</option>
+        </select>
         <select id="speedSelect">
             <option value="slow">Slow</option>
             <option value="medium">Medium</option>
@@ -78,37 +96,48 @@
     </div>
 
     <div class="display-container">
-        <div id="ledText" class="led-text color-red">Welcome to LED Display!</div>
+        <div id="ledText" class="led-text color-red static">Welcome!</div>
     </div>
 
     <script>
         function updateDisplay() {
-            const message = document.getElementById('messageInput').value || 'Welcome to LED Display!';
+            const message = document.getElementById('messageInput').value || 'Welcome!';
             const color = document.getElementById('colorSelect').value;
+            const movement = document.getElementById('movementSelect').value;
             const speed = document.getElementById('speedSelect').value;
             const ledText = document.getElementById('ledText');
 
-            // Update text
             ledText.textContent = message;
+            
+            // Actualizar color y movimiento
+            ledText.className = `led-text color-${color} ${movement}`;
 
-            // Update color
-            ledText.className = `led-text color-${color}`;
-
-            // Update speed
-            const speeds = {
-                slow: '20s',
-                medium: '15s',
-                fast: '10s'
-            };
-            ledText.style.animationDuration = speeds[speed];
+            // Actualizar velocidad solo si está en modo scroll
+            if (movement === 'scroll') {
+                const speeds = {
+                    slow: '20s',
+                    medium: '15s',
+                    fast: '10s'
+                };
+                ledText.style.animationDuration = speeds[speed];
+            }
         }
 
-        // Optional: Update display when Enter key is pressed
+        // Actualizar cuando se presiona Enter
         document.getElementById('messageInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 updateDisplay();
             }
         });
+
+        // Mostrar/ocultar selector de velocidad según el movimiento
+        document.getElementById('movementSelect').addEventListener('change', function() {
+            const speedSelect = document.getElementById('speedSelect');
+            speedSelect.style.display = this.value === 'scroll' ? 'block' : 'none';
+        });
+
+        // Ocultar selector de velocidad inicialmente si está en modo estático
+        document.getElementById('speedSelect').style.display = 'none';
     </script>
 </body>
 </html>
