@@ -7,47 +7,57 @@
     <style>
         body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             background-color: #000;
             min-height: 100vh;
             font-family: Arial, sans-serif;
+            overflow: hidden;
         }
 
         .controls {
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 300px;
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
         }
 
         input, button, select {
             width: 100%;
-            padding: 10px;
+            padding: 15px;
             margin: 5px 0;
             border: none;
             border-radius: 5px;
             font-size: 18px;
+            background: #333;
+            color: white;
+        }
+
+        button {
+            background: #444;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #555;
         }
 
         .display-container {
-            background-color: #000;
-            padding: 20px;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 100%;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
-            margin-top: 20px;
         }
 
         .led-text {
             font-family: monospace;
             white-space: nowrap;
-            color: #ff0000;
-            font-size: 48px;
+            font-size: 15vw; /* Tamaño responsivo */
             text-align: center;
-            text-shadow: 0 0 10px #ff0000;
             font-weight: bold;
         }
 
@@ -56,63 +66,78 @@
         }
 
         @keyframes scroll-left {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100vw); }
         }
 
         .static {
             animation: none;
-            /* Centrar el texto cuando está estático */
-            display: flex;
-            justify-content: center;
-            width: 100%;
+            padding: 20px;
         }
 
         .color-red { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
         .color-green { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
         .color-blue { color: #0000ff; text-shadow: 0 0 10px #0000ff; }
         .color-yellow { color: #ffff00; text-shadow: 0 0 10px #ffff00; }
+
+        #backButton {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: auto;
+            padding: 10px 20px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
-    <div class="controls">
-        <input type="text" id="messageInput" placeholder="Enter your message">
+    <button id="backButton" onclick="showControls()">← Volver</button>
+
+    <div id="controlsPanel" class="controls">
+        <input type="text" id="messageInput" placeholder="Escribe tu mensaje">
         <select id="colorSelect">
-            <option value="red">Red</option>
-            <option value="green">Green</option>
-            <option value="blue">Blue</option>
-            <option value="yellow">Yellow</option>
+            <option value="red">Rojo</option>
+            <option value="green">Verde</option>
+            <option value="blue">Azul</option>
+            <option value="yellow">Amarillo</option>
         </select>
         <select id="movementSelect">
-            <option value="static">Static</option>
-            <option value="scroll">Scrolling</option>
+            <option value="static">Estático</option>
+            <option value="scroll">Desplazamiento</option>
         </select>
         <select id="speedSelect">
-            <option value="slow">Slow</option>
-            <option value="medium">Medium</option>
-            <option value="fast">Fast</option>
+            <option value="slow">Lento</option>
+            <option value="medium">Medio</option>
+            <option value="fast">Rápido</option>
         </select>
-        <button onclick="updateDisplay()">Update Display</button>
+        <button onclick="updateDisplay()">Mostrar</button>
     </div>
 
     <div class="display-container">
-        <div id="ledText" class="led-text color-red static">Welcome!</div>
+        <div id="ledText" class="led-text color-red static"></div>
     </div>
 
     <script>
+        const controlsPanel = document.getElementById('controlsPanel');
+        const backButton = document.getElementById('backButton');
+        const speedSelect = document.getElementById('speedSelect');
+        const movementSelect = document.getElementById('movementSelect');
+
         function updateDisplay() {
-            const message = document.getElementById('messageInput').value || 'Welcome!';
+            const message = document.getElementById('messageInput').value || 'BIENVENIDO';
             const color = document.getElementById('colorSelect').value;
             const movement = document.getElementById('movementSelect').value;
             const speed = document.getElementById('speedSelect').value;
             const ledText = document.getElementById('ledText');
 
             ledText.textContent = message;
-            
-            // Actualizar color y movimiento
             ledText.className = `led-text color-${color} ${movement}`;
 
-            // Actualizar velocidad solo si está en modo scroll
             if (movement === 'scroll') {
                 const speeds = {
                     slow: '20s',
@@ -121,23 +146,29 @@
                 };
                 ledText.style.animationDuration = speeds[speed];
             }
+
+            // Ocultar controles y mostrar botón de volver
+            controlsPanel.classList.add('hidden');
+            backButton.style.display = 'block';
         }
 
-        // Actualizar cuando se presiona Enter
+        function showControls() {
+            controlsPanel.classList.remove('hidden');
+            backButton.style.display = 'none';
+        }
+
+        movementSelect.addEventListener('change', function() {
+            speedSelect.style.display = this.value === 'scroll' ? 'block' : 'none';
+        });
+
         document.getElementById('messageInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 updateDisplay();
             }
         });
 
-        // Mostrar/ocultar selector de velocidad según el movimiento
-        document.getElementById('movementSelect').addEventListener('change', function() {
-            const speedSelect = document.getElementById('speedSelect');
-            speedSelect.style.display = this.value === 'scroll' ? 'block' : 'none';
-        });
-
         // Ocultar selector de velocidad inicialmente si está en modo estático
-        document.getElementById('speedSelect').style.display = 'none';
+        speedSelect.style.display = 'none';
     </script>
 </body>
 </html>
